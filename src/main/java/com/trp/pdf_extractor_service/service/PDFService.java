@@ -13,15 +13,17 @@ import java.io.IOException;
 @Service
 public class PDFService {
 
-    public String extractText(final MultipartFile multipartFile) {
-        String extractedText;
+    private final String PDF_TEXT_EXTRACT_ERROR = "Failed to extract text from PDF";
 
-        try (final PDDocument document = PDDocument.load(multipartFile.getInputStream())) {
+    public String extractText(final File pdfFile) {
+        String extractedText = "";
+
+        try (final PDDocument document = PDDocument.load(pdfFile)) {
             final PDFTextStripper pdfStripper = new PDFTextStripper();
             extractedText = pdfStripper.getText(document);
         } catch (final Exception ex) {
-            log.error("Error parsing PDF", ex);
-            extractedText = "Error parsing PDF";
+            log.error(PDF_TEXT_EXTRACT_ERROR, ex);
+            extractedText = PDF_TEXT_EXTRACT_ERROR;
         }
 
         return extractedText;

@@ -6,17 +6,20 @@ Uses Spring Boot Web, PDFBox and Tesseract to extract text, tables and images fr
 
 * Build project:
 
-`mvn clean install`
+  `mvn clean install`
+
 
 * Run service:
 
-`mvn spring:boot:run`
+  `mvn spring:boot:run`
+
 
 * Use REST client like Postman and make POST Call:
 
   * Request:
-    * POST http://localhost:8086/api/v1/pdf/extract-text
-    * Body: Param: File, Value: PDF_File.pdf
+    * Method: `POST`
+    * URL: `http://localhost:8086/api/v1/pdf/extract-text`
+    * Body: Param: `File`, Value: `ERDM_PR_Test.pdf`
 
   * Response:
 

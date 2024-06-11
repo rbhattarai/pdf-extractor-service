@@ -5,6 +5,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -13,7 +15,7 @@ public class PDFContentDTO {
 
     private String textContent;
 
-    private String tableContent;
+    private List<List<String>> tables;
 
-    private String imageContent;
+    private List<String> images;
 }

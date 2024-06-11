@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
-import java.io.IOException;
 
 @Slf4j
 @RestController
@@ -47,5 +46,24 @@ public class PDFController {
             }
         }
     }
+
+    @PostMapping(path = "/extract-tables", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseStatus(HttpStatus.OK)
+    public ResponseEntity<PDFContentDTO> extractTables(@NonNull @RequestParam("file") final MultipartFile pdfFile) {
+        if (pdfFile.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+
+        try {
+            var tables = pdfService.extractTables(pdfFile);
+            var pdfContentDTO = PDFContentDTO.builder().tables(tables).build();
+            return ResponseEntity.ok().body(pdfContentDTO);
+        } catch (Exception e) {
+            log.error("Error processing PDF file: ", e.getMessage());
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+
 
 }

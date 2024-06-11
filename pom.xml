@@ -26,6 +26,7 @@
 			<artifactId>spring-boot-starter-test</artifactId>
 			<scope>test</scope>
 		</dependency>
+		<!-- Apache PDFBox for PDF processing -->
 		<dependency>
 			<groupId>org.apache.pdfbox</groupId>
 			<artifactId>pdfbox</artifactId>
@@ -37,6 +38,13 @@
 			<version>1.18.24</version>
 			<scope>provided</scope>
 		</dependency>
+		<!-- For identifying table in PDF -->
+		<dependency>
+			<groupId>technology.tabula</groupId>
+			<artifactId>tabula</artifactId>
+			<version>1.0.5</version>
+		</dependency>
+
 	</dependencies>
 
 	<build>

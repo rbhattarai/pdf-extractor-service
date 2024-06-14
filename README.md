@@ -16,7 +16,7 @@ Uses Spring Boot Web, PDFBox and Tesseract to extract text, tables and images fr
 
 * Use REST client like Postman and make POST Call:
 
-  * Request:
+  * Below request helps to extract text content from PDF file:
     * Method: `POST`
     * URL: `http://localhost:8086/api/v1/pdf/extract-text`
     * Body: Param: `File`, Value: `ERDM_PR_Test.pdf`
@@ -28,4 +28,22 @@ Uses Spring Boot Web, PDFBox and Tesseract to extract text, tables and images fr
         "tableContent": null,
         "imageContent": null
         }`
-    
+  
+* Similarly, there are endpoints for `extract-tables`, `extract-images` and `extract-all`  
+
+  * Below request helps to extract text from tables and charts:
+    * Method: `POST`
+    * URL: `http://localhost:8086/api/v1/pdf/extract-tables`
+    * Body: Param: `File`, Value: `ERDM_PR_Test.pdf`
+
+  * Below request helps to extract text from images:
+    * Method: `POST`
+    * URL: `http://localhost:8086/api/v1/pdf/extract-tables`
+    * Body: Param: `File`, Value: `ERDM_PR_Test.pdf`
+
+  * Below request helps to extract text from normal text, tables, charts and images:
+    * Method: `POST`
+    * URL: `http://localhost:8086/api/v1/pdf/extract-all`
+    * Body: Param: `File`, Value: `ERDM_PR_Test.pdf`
+  
+

@@ -1,5 +1,6 @@
 package com.trp.pdf_extractor_service.service;
 
+import com.trp.pdf_extractor_service.dto.PDFContentDTO;
 import lombok.extern.slf4j.Slf4j;
 import net.sourceforge.tess4j.ITesseract;
 import net.sourceforge.tess4j.Tesseract;
@@ -27,9 +28,19 @@ import java.util.List;
 @Service
 public class PDFService {
 
+    public static final String TESSDATA_PREFIX = "src/main/resources/tessdata";
     public static final String PDF_TEXT_EXTRACT_ERROR = "Failed to extract text from PDF";
     public static final String PDF_TABLE_EXTRACT_ERROR = "Failed to extract tables from PDF";
+    public static final String PDF_IMAGE_EXTRACT_ERROR = "Failed to extract images from PDF";
+    public static final String PDF_IMAGE_OCR_ERROR = "Failed to perform OCR on extracted images";
+    public static final String PDF_IMAGE_FAILED_DELETE = "Failed to delete temporary image file: {}";
 
+    private final ITesseract tesseract;
+
+    public PDFService() {
+        this.tesseract = new Tesseract();
+        tesseract.setDatapath(TESSDATA_PREFIX);
+    }
 
     public String extractText(final File pdfFile) {
         String extractedText = "";
@@ -65,6 +76,34 @@ public class PDFService {
         return extractedText.toString();
     }
 
+    public List<List<String>> extractTables(final File pdfFile) {
+        List<List<String>> tables = new ArrayList<>();
+
+        try (final PDDocument document = PDDocument.load(pdfFile)) {
+            ObjectExtractor extractor = new ObjectExtractor(document);
+
+            SpreadsheetExtractionAlgorithm sea = new SpreadsheetExtractionAlgorithm();
+            for (PageIterator it = extractor.extract(); it.hasNext(); ) {
+                Page page = it.next();
+                List<Table> pageTables = sea.extract(page);
+                for (Table table : pageTables) {
+                    List<String> tableData = new ArrayList<>();
+                    for (List<RectangularTextContainer> row : table.getRows()) {
+                        StringBuilder rowText = new StringBuilder();
+                        for (RectangularTextContainer cell : row) {
+                            rowText.append(cell.getText()).append("\t");
+                        }
+                        tableData.add(rowText.toString());
+                    }
+                    tables.add(tableData);
+                }
+            }
+        } catch (IOException e) {
+            log.error(PDF_TABLE_EXTRACT_ERROR, e);
+        }
+        return tables;
+    }
+
     public List<List<String>> extractTables(MultipartFile multipartFile) {
         List<List<String>> tables = new ArrayList<>();
         try (InputStream inputStream = multipartFile.getInputStream()) {
@@ -91,7 +130,74 @@ public class PDFService {
         return tables;
     }
 
+    public List<String> extractImages(final File pdfFile) {
+        List<String> ocrResults = new ArrayList<>();
 
+        try (PDDocument document = PDDocument.load(pdfFile)) {
+            for (PDPage page : document.getPages()) {
+                PDResources resources = page.getResources();
+                for (COSName xObjectName : resources.getXObjectNames()) {
+                    if (resources.isImageXObject(xObjectName)) {
+                        PDImageXObject imageXObject = (PDImageXObject) resources.getXObject(xObjectName);
+                        BufferedImage image = imageXObject.getImage();
+                        File tempImageFile = File.createTempFile("tempImage", ".png");
+                        ImageIO.write(image, "png", tempImageFile);
+                        try {
+                            String ocrResult = tesseract.doOCR(tempImageFile);
+                            ocrResults.add(ocrResult);
+                        } finally {
+                            if (!tempImageFile.delete()) {
+                                log.warn(PDF_IMAGE_FAILED_DELETE, tempImageFile.getAbsolutePath());
+                            }
+                        }
+                    }
+                }
+            }
+        } catch (IOException e) {
+            log.error(PDF_IMAGE_EXTRACT_ERROR, e);
+        } catch (Exception e) {
+            log.error(PDF_IMAGE_OCR_ERROR, e);
+        }
+        return ocrResults;
+    }
+
+    public List<String> extractImages(MultipartFile multipartFile) {
+        List<String> ocrResults = new ArrayList<>();
+        try (PDDocument document = PDDocument.load(multipartFile.getInputStream())) {
+            for (PDPage page : document.getPages()) {
+                PDResources resources = page.getResources();
+                for (COSName xObjectName : resources.getXObjectNames()) {
+                    if (resources.isImageXObject(xObjectName)) {
+                        PDImageXObject imageXObject = (PDImageXObject) resources.getXObject(xObjectName);
+                        BufferedImage image = imageXObject.getImage();
+                        File tempImageFile = File.createTempFile("tempImage", ".png");
+                        ImageIO.write(image, "png", tempImageFile);
+                        try {
+                            String ocrResult = tesseract.doOCR(tempImageFile);
+                            ocrResults.add(ocrResult);
+                        } finally {
+                            if (!tempImageFile.delete()) {
+                                log.warn(PDF_IMAGE_FAILED_DELETE, tempImageFile.getAbsolutePath());
+                            }
+                        }
+                    }
+                }
+            }
+        } catch (IOException e) {
+            log.error(PDF_IMAGE_EXTRACT_ERROR, e);
+        } catch (Exception e) {
+            log.error(PDF_IMAGE_OCR_ERROR, e);
+        }
+        return ocrResults;
+    }
+
+    public PDFContentDTO extractAll(File pdfFile) {
+        PDFContentDTO pdfContentDTO = new PDFContentDTO();
+        pdfContentDTO.setTextContent(extractText(pdfFile));
+        pdfContentDTO.setTables(extractTables(pdfFile));
+        pdfContentDTO.setImages(extractImages(pdfFile));
+        return pdfContentDTO;
+    }
 
 
 }

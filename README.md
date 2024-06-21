@@ -4,14 +4,25 @@ Uses Spring Boot Web, PDFBox and Tesseract to extract text, tables and images fr
 
 ## Steps
 
-* Build project:
+  * Build project:
+  
+    `mvn clean install`
 
-  `mvn clean install`
+* In local:  
+  
+  * Run service :
+  
+    `mvn spring-boot:run`
 
+* In docker container:
+  
+  * Build project: will use the PDFExtractorService.jar created above
 
-* Run service:
+    `docker build -f Dockerfile -t pdf-extractor-service .`
 
-  `mvn spring:boot:run`
+  * Run service:
+    
+    `docker run -p 8086:8086 pdf-extractor-service`
 
 
 * Use REST client like Postman and make POST Call:
@@ -38,7 +49,7 @@ Uses Spring Boot Web, PDFBox and Tesseract to extract text, tables and images fr
 
   * Below request helps to extract text from images:
     * Method: `POST`
-    * URL: `http://localhost:8086/api/v1/pdf/extract-tables`
+    * URL: `http://localhost:8086/api/v1/pdf/extract-images`
     * Body: Param: `File`, Value: `ERDM_PR_Test.pdf`
 
   * Below request helps to extract text from normal text, tables, charts and images:

@@ -28,7 +28,9 @@ import java.util.List;
 @Service
 public class PDFService {
 
-    public static final String TESSDATA_PREFIX = "src/main/resources/tessdata";
+    public static final String TESSDATA_PREFIX_LOCAL = "src/main/resources/tessdata";
+    private static final String DEFAULT_TESSDATA_PREFIX = "/usr/share/tesseract-ocr/4.00/tessdata";
+
     public static final String PDF_TEXT_EXTRACT_ERROR = "Failed to extract text from PDF";
     public static final String PDF_TABLE_EXTRACT_ERROR = "Failed to extract tables from PDF";
     public static final String PDF_IMAGE_EXTRACT_ERROR = "Failed to extract images from PDF";
@@ -37,9 +39,22 @@ public class PDFService {
 
     private final ITesseract tesseract;
 
+    private String getTessDataPrefix() {
+        String tessDataPrefix = System.getenv("TESSDATA_PREFIX");
+        String env = System.getenv("ENV");
+
+        if (env != null && env.equals("local")) {
+            tessDataPrefix = TESSDATA_PREFIX_LOCAL;
+        } else if (tessDataPrefix == null) {
+            tessDataPrefix = DEFAULT_TESSDATA_PREFIX;
+        }
+
+        return tessDataPrefix;
+    }
+
     public PDFService() {
         this.tesseract = new Tesseract();
-        tesseract.setDatapath(TESSDATA_PREFIX);
+        tesseract.setDatapath(this.getTessDataPrefix());
     }
 
     public String extractText(final File pdfFile) {

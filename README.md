@@ -24,13 +24,24 @@ Uses Spring Boot Web, PDFBox and Tesseract to extract text, tables and images fr
     
     `docker run -p 8086:8086 pdf-extractor-service`
 
+* Configure TessData and Set Env Vars (for local environment only):
+
+  cd src/main/resources/tessdata
+
+  Either git pull or download data from: https://github.com/tesseract-ocr/tessdata
+
+  Set env vars as:
+  
+  TESSDATA_PREFIX=src/main/resources/tessdata
+
+  ENV=local
 
 * Use REST client like Postman and make POST Call:
 
   * Below request helps to extract text content from PDF file:
     * Method: `POST`
     * URL: `http://localhost:8086/api/v1/pdf/extract-text`
-    * Body: Param: `File`, Value: `ERDM_PR_Test.pdf`
+    * Body: Param: `file`, Value: `ERDM_PR_Test.pdf`
 
   * Response:
 
@@ -45,16 +56,25 @@ Uses Spring Boot Web, PDFBox and Tesseract to extract text, tables and images fr
   * Below request helps to extract text from tables and charts:
     * Method: `POST`
     * URL: `http://localhost:8086/api/v1/pdf/extract-tables`
-    * Body: Param: `File`, Value: `ERDM_PR_Test.pdf`
+    * Body: Param: `file`, Value: `ERDM_PR_Test.pdf`
 
   * Below request helps to extract text from images:
     * Method: `POST`
     * URL: `http://localhost:8086/api/v1/pdf/extract-images`
-    * Body: Param: `File`, Value: `ERDM_PR_Test.pdf`
+    * Body: Param: `file`, Value: `ERDM_PR_Test.pdf`
 
   * Below request helps to extract text from normal text, tables, charts and images:
     * Method: `POST`
     * URL: `http://localhost:8086/api/v1/pdf/extract-all`
-    * Body: Param: `File`, Value: `ERDM_PR_Test.pdf`
-  
+    * Body: Param: `file`, Value: `ERDM_PR_Test.pdf`
 
+  * Below request helps to extract text from specific rectangular area or section:
+    * Method: `POST`
+    * URL: `http://localhost:8086/api/v1/pdf/extract-section`
+    * Body: 
+      * Param: `file`, Value: `ERDM_PR_Test.pdf`
+      * Param: `x`, Value: `50`
+      * Param: `y`, Value: `50`
+      * Param: `width`, Value: `200`
+      * Param: `height`, Value: `200`
+    

@@ -1,6 +1,7 @@
 package com.trp.pdf_extractor_service.service;
 
 import com.trp.pdf_extractor_service.dto.PDFContentDTO;
+import com.trp.pdf_extractor_service.utils.CustomPDFTextStripper;
 import lombok.extern.slf4j.Slf4j;
 import net.sourceforge.tess4j.ITesseract;
 import net.sourceforge.tess4j.Tesseract;
@@ -34,6 +35,7 @@ public class PDFService {
     public static final String PDF_TEXT_EXTRACT_ERROR = "Failed to extract text from PDF";
     public static final String PDF_TABLE_EXTRACT_ERROR = "Failed to extract tables from PDF";
     public static final String PDF_IMAGE_EXTRACT_ERROR = "Failed to extract images from PDF";
+    public static final String PDF_SECTION_EXTRACT_ERROR = "Failed to extract text from section in PDF";
     public static final String PDF_IMAGE_OCR_ERROR = "Failed to perform OCR on extracted images";
     public static final String PDF_IMAGE_FAILED_DELETE = "Failed to delete temporary image file: {}";
 
@@ -212,6 +214,19 @@ public class PDFService {
         pdfContentDTO.setTables(extractTables(pdfFile));
         pdfContentDTO.setImages(extractImages(pdfFile));
         return pdfContentDTO;
+    }
+
+    public String extractTextFromSection(File pdfFile, int page, int x, int y, int width, int height) {
+        String extractedText = "";
+        try (PDDocument document = PDDocument.load(pdfFile)) {
+            CustomPDFTextStripper pdfStripper = new CustomPDFTextStripper();
+            java.awt.Rectangle area = new java.awt.Rectangle(x, y, width, height);
+            extractedText = pdfStripper.extractTextFromArea(document, page, area);
+        } catch (Exception ex) {
+            log.error(PDF_SECTION_EXTRACT_ERROR, ex.getMessage());
+            extractedText = PDF_SECTION_EXTRACT_ERROR;
+        }
+        return extractedText;
     }
 
 
